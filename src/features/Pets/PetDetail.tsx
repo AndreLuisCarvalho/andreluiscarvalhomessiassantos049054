@@ -6,7 +6,7 @@ import { api } from '../../api/api';
 import { Pet, Tutor } from '../../api/types';
 
 const PetDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [pet, setPet] = useState<Pet | null>(null);
   const [tutor, setTutor] = useState<Tutor | null>(null);
@@ -17,11 +17,14 @@ const PetDetail: React.FC = () => {
       try {
         // 1. Busca o Pet
         const petRes = await api.get<Pet>(`/v1/pets/${id}`);
-        setPet(petRes.data);
+        const petData = petRes.data;
+        setPet(petData);
 
-        // 2. Se houver tutor vinculado, busca os dados dele
-        if (petRes.data.tutorId) {
-          const tutorRes = await api.get<Tutor>(`/v1/tutores/${petRes.data.tutorId}`);
+        // 2. Lógica para buscar tutor (Objeto aninhado ou ID separado)
+        if (petData.tutor) {
+          setTutor(petData.tutor);
+        } else if (petData.tutorId) {
+          const tutorRes = await api.get<Tutor>(`/v1/tutores/${petData.tutorId}`);
           setTutor(tutorRes.data);
         }
       } catch (err) {
@@ -33,7 +36,12 @@ const PetDetail: React.FC = () => {
     loadData();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-blue-500 font-black animate-pulse uppercase tracking-[0.3em]">Carregando Prontuário...</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center text-blue-500 font-black animate-pulse uppercase tracking-[0.3em]">
+      Carregando Prontuário...
+    </div>
+  );
+  
   if (!pet) return <div className="min-h-screen bg-black text-white p-10">Pet não encontrado.</div>;
 
   return (
@@ -49,19 +57,31 @@ const PetDetail: React.FC = () => {
           
           {/* Lado Esquerdo: Imagem e Destaque */}
           <div className="space-y-6">
-            <div className="aspect-square rounded-[3rem] overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl">
-              {pet.fotoUrl ? (
-                <img src={`https://pet-manager-api.geia.vip/v1/pets/fotos/${pet.fotoUrl}`} className="w-full h-full object-cover" alt={pet.nome} />
+            <div className="aspect-square rounded-[3rem] overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl relative">
+              {/* Ajustado para usar o objeto foto conforme types.ts */}
+              {pet.foto?.url ? (
+                <img 
+                  src={pet.foto.url} 
+                  className="w-full h-full object-cover" 
+                  alt={pet.nome} 
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-zinc-800"><PawPrint size={100} /></div>
+                <div className="w-full h-full flex items-center justify-center text-zinc-800">
+                  <PawPrint size={100} />
+                </div>
               )}
             </div>
             
-            <div className="bg-zinc-900/50 p-8 rounded-[2.5rem] border border-zinc-800/50">
+            <div className="bg-zinc-900/50 p-8 rounded-[2.5rem] border border-zinc-800/50 shadow-lg">
               <h1 className="text-6xl font-black italic uppercase tracking-tighter text-blue-600 mb-2 leading-none">
                 {pet.nome}
               </h1>
-              <p className="text-zinc-400 font-bold uppercase text-xs tracking-widest">{pet.especie} • {pet.raca}</p>
+              <p className="text-zinc-400 font-bold uppercase text-xs tracking-widest">
+                {pet.especie} <span className="text-zinc-700 mx-2">•</span> {pet.raca || 'Sem Raça definida'}
+              </p>
             </div>
           </div>
 
@@ -100,6 +120,7 @@ const PetDetail: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <MapPin size={16} className="text-blue-500" />
+                    {/* Agora 'endereco' está mapeado no seu type */}
                     <span className="text-zinc-300 font-bold text-sm">{tutor.endereco}</span>
                   </div>
                 </div>
@@ -113,7 +134,7 @@ const PetDetail: React.FC = () => {
 
             {/* Ações */}
             <button 
-              onClick={() => navigate(`/pets/novo?edit=${pet.id}`)}
+              onClick={() => navigate(`/pets/editar/${pet.id}`)}
               className="w-full py-5 bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-[0.2em] rounded-2xl transition-all border border-zinc-800"
             >
               Editar Prontuário

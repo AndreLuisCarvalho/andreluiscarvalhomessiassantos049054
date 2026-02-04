@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,6 +15,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* src/index.css */
+
+
+body {
+  margin: 0;
+  background-color: black;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
@@ -24,10 +34,12 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  background-color: black;
+  color: white;
   min-height: 100vh;
+  width: 100%;
+  display: block; /* Garante que o layout flua de cima para baixo */
 }
 
 h1 {

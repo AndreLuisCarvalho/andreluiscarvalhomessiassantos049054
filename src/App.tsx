@@ -2,14 +2,16 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import { Dog, Users, LogOut, PawPrint } from 'lucide-react';
 
-// Lazy Loading - Requisito obrigatório do Edital
+// Substitua seus imports lazy por estes:
 const LoginPage = lazy(() => import('./features/Auth/LoginPage'));
-const PetsPage = lazy(() => import('./features/Pets/PetsPage'));
-const PetDetail = lazy(() => import('./features/Pets/PetDetail'));
-const PetForm = lazy(() => import('./features/Pets/PetForm'));
-const TutoresPage = lazy(() => import('./features/tutores/TutoresPage'));
-const TutorDetail = lazy(() => import('./features/tutores/TutorDetail'));
-const TutorForm = lazy(() => import('./features/tutores/TutorForm'));
+const PetsPage = lazy(() => import('./features/Pets/pages/PetsPage'));
+const PetDetail = lazy(() => import('./features/Pets/PetDetail')); // Verifique se está na raiz de Pets ou em pages
+const PetForm = lazy(() => import('./features/Pets/components/PetForm'));
+
+// Atenção: Na imagem 719247, a pasta tutores está em minúsculo
+const TutoresPage = lazy(() => import('./features/tutores/pages/TutoresPage')); 
+const TutorDetail = lazy(() => import('./features/tutores/pages/TutorDetail'));
+const TutorForm = lazy(() => import('./features/tutores//components/TutorForm'));
 
 // Componente de Navegação com Proteção de Token
 const Navbar = () => {
